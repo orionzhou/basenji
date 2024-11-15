@@ -57,7 +57,7 @@ def dna_1hot(seq, seq_len=None, n_uniform=False, n_sample=False):
     seq_code = np.zeros((seq_len, 4), dtype='float16')
   else:
     seq_code = np.zeros((seq_len, 4), dtype='bool')
-    
+
   for i in range(seq_len):
     if i >= seq_start and i - seq_start < len(seq):
       nt = seq[i - seq_start]
@@ -93,7 +93,7 @@ def dna_1hot_index(seq, n_sample=False):
 
   # map nt's to a len(seq) of 0,1,2,3
   seq_code = np.zeros(seq_len, dtype='uint8')
-    
+
   for i in range(seq_len):
     nt = seq[i]
     if nt == 'A':
@@ -222,6 +222,33 @@ def hot1_dna(seqs_1hot):
 
   return seqs
 
+def hot1_index_dna(seqs_1hot):
+  singleton = False
+  if seqs_1hot.ndim == 2:
+    singleton = True
+    seqs_1hot = np.expand_dims(seqs_1hot, 0)
+
+  seqs = []
+  for si in range(seqs_1hot.shape[0]):
+    seq_list = ['A'] * seqs_1hot.shape[1]
+    for li in range(seqs_1hot.shape[1]):
+      if seqs_1hot[si, li, 0] == 0:
+        seq_list[li] = 'A'
+      elif seqs_1hot[si, li, 0] == 1:
+        seq_list[li] = 'C'
+      elif seqs_1hot[si, li, 0] == 2:
+        seq_list[li] = 'G'
+      elif seqs_1hot[si, li, 0] == 3:
+        seq_list[li] = 'T'
+      else:
+        seq_list[li] = 'N'
+
+    seqs.append(''.join(seq_list))
+
+  if singleton:
+    seqs = seqs[0]
+
+  return seqs
 
 def hot1_get(seqs_1hot, pos):
   """ hot1_get

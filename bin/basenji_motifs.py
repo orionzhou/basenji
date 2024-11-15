@@ -87,6 +87,9 @@ def main():
   parser.add_option('-t', dest='trim_filters',
       default=False, action='store_true',
       help='Trim uninformative positions off the filter ends [Default: %default]')
+  parser.add_option('--split', dest='split_label',
+      default='test',
+      help='Dataset split label for eg TFR pattern [Default: %default]')
   parser.add_option('--tfr', dest='tfr_pattern',
       default=None,
       help='TFR pattern string appended to data_dir/tfrecords for subsetting [Default: %default]')
@@ -125,7 +128,7 @@ def main():
 
   # obtain sequences
   eval_seqs_1hot = eval_data.numpy(return_inputs=True, return_outputs=False)
-  eval_seqs_dna = dna_io.hot1_dna(eval_seqs_1hot)
+  eval_seqs_dna = dna_io.hot1_index_dna(eval_seqs_1hot)
   del eval_seqs_1hot
 
   #################################################################
@@ -137,7 +140,7 @@ def main():
 
   # first layer embedding
   seqnn_model.build_embed(0, batch_norm=(~options.post_conv))
-  _, preds_length, preds_depth  = seqnn_model.embed.output.shape 
+  _, preds_length, preds_depth  = seqnn_model.model.output.shape
 
   # get weights
   filter_weights = seqnn_model.get_conv_weights()
@@ -235,7 +238,7 @@ def main():
     if options.plot_density:
       # plot density of filter output scores
       plot_score_density(f_scores,
-          '%s/filter%d_dens.pdf' % (options.out_dir, f))      
+          '%s/filter%d_dens.pdf' % (options.out_dir, f))
 
     row_cols = (f, consensus, annotation, filters_ic[f], fmean, fstd)
     print('%-3d  %19s  %10s  %5.2f  %6.4f  %6.4f' % row_cols, file=table_out)
